@@ -39,6 +39,9 @@ const App: () => Node = () => {
   };
 
   const [window, setWindow] = useState(Dimensions.get('window'));
+  const [layoutWidth, setLayoutWidth] = useState(0);
+  const [layoutHeight, setLayoutHeight] = useState(0);
+  const [shouldResume, setShouldResume] = useState(false);
 
   console.log(NativeModules);
 
@@ -53,21 +56,34 @@ const App: () => Node = () => {
       <Text>Hello?</Text>
 
       <View
-        onLayout={e => console.log('1: ', e.nativeEvent.layout)}
+        onLayout={e => {
+          console.log('1: ', e.nativeEvent.layout);
+          setLayoutHeight(e.nativeEvent.layout.height);
+          setLayoutWidth(e.nativeEvent.layout.width);
+        }}
         style={{backgroundColor: 'black', width: '100%', height: '100%'}}
         onStartShouldSetResponder={() => {
           NativeModules.NativePlayer.enterPictureInPicture();
+          setShouldResume(true);
         }}>
         <Video
           ref={ref => {
             console.log('ref: ', ref);
           }}
+          shouldResume={true}
+          pictureInPicture={true}
           resizeMode={'contain'}
           onLayout={e => console.log('2: ', e.nativeEvent.layout)}
           source={{
             uri: 'https://fbvslgdlnt.singularcdn.net.br/e20e1217-d55e-11eb-8291-d05099da38e8/playlist.m3u8',
           }} // Can be a URL or a local file.
-          style={styles.backgroundVideo}
+          style={[
+            {
+              width: layoutWidth - 50,
+              height: layoutHeight - 50,
+            },
+            styles.backgroundVideo,
+          ]}
         />
       </View>
     </SafeAreaView>
@@ -77,8 +93,6 @@ const App: () => Node = () => {
 let styles = StyleSheet.create({
   backgroundVideo: {
     position: 'absolute',
-    width: window.width,
-    height: window.height,
     top: 0,
     left: 0,
     bottom: 0,
