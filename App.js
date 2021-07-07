@@ -6,16 +6,21 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import type {Node} from 'react';
+
+import Video from 'react-native-video';
+
 import {
   SafeAreaView,
-  ScrollView,
+  NativeModules,
   StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
   View,
+  Dimensions,
+  Button,
 } from 'react-native';
 
 import {
@@ -26,32 +31,6 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
-
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -59,53 +38,51 @@ const App: () => Node = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [window, setWindow] = useState(Dimensions.get('window'));
+
+  console.log(NativeModules);
+
+  useEffect(() => {
+    setWindow(Dimensions.get('window'));
+    console.log('updated: ', typeof window.height === typeof 100);
+  }, [window]);
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      <Text>Hello?</Text>
+
+      <View
+        onLayout={e => console.log('1: ', e.nativeEvent.layout)}
+        style={{backgroundColor: 'black', width: '100%', height: '100%'}}
+        onStartShouldSetResponder={() => {
+          NativeModules.NativePlayer.enterPictureInPicture();
+        }}>
+        <Video
+          ref={ref => {
+            console.log('ref: ', ref);
+          }}
+          resizeMode={'contain'}
+          onLayout={e => console.log('2: ', e.nativeEvent.layout)}
+          source={{
+            uri: 'https://fbvslgdlnt.singularcdn.net.br/e20e1217-d55e-11eb-8291-d05099da38e8/playlist.m3u8',
+          }} // Can be a URL or a local file.
+          style={styles.backgroundVideo}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+let styles = StyleSheet.create({
+  backgroundVideo: {
+    position: 'absolute',
+    width: window.width,
+    height: window.height,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
   },
 });
 
