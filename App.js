@@ -9,8 +9,6 @@
 import React, {useState, useEffect} from 'react';
 import type {Node} from 'react';
 
-import Video from 'react-native-video';
-
 import {
   SafeAreaView,
   NativeModules,
@@ -19,9 +17,10 @@ import {
   Text,
   useColorScheme,
   View,
-  Dimensions,
   Button,
 } from 'react-native';
+
+import Video from './src/ReactNativeVideo';
 
 import {
   Colors,
@@ -38,17 +37,10 @@ const App: () => Node = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const [window, setWindow] = useState(Dimensions.get('window'));
   const [layoutWidth, setLayoutWidth] = useState(0);
-  const [layoutHeight, setLayoutHeight] = useState(0);
   const [shouldResume, setShouldResume] = useState(false);
 
   console.log(NativeModules);
-
-  useEffect(() => {
-    setWindow(Dimensions.get('window'));
-    console.log('updated: ', typeof window.height === typeof 100);
-  }, [window]);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -58,29 +50,23 @@ const App: () => Node = () => {
       <View
         onLayout={e => {
           console.log('1: ', e.nativeEvent.layout);
-          setLayoutHeight(e.nativeEvent.layout.height);
           setLayoutWidth(e.nativeEvent.layout.width);
         }}
-        style={{backgroundColor: 'black', width: '100%', height: '100%'}}
+        style={{backgroundColor: 'black', width: '100%', height: 234}}
         onStartShouldSetResponder={() => {
           NativeModules.NativePlayer.enterPictureInPicture();
           setShouldResume(true);
         }}>
         <Video
-          ref={ref => {
-            console.log('ref: ', ref);
-          }}
-          shouldResume={true}
-          pictureInPicture={true}
-          resizeMode={'contain'}
+          resizeMode="contain"
           onLayout={e => console.log('2: ', e.nativeEvent.layout)}
           source={{
             uri: 'https://fbvslgdlnt.singularcdn.net.br/e20e1217-d55e-11eb-8291-d05099da38e8/playlist.m3u8',
           }} // Can be a URL or a local file.
           style={[
             {
-              width: layoutWidth - 50,
-              height: layoutHeight - 50,
+              width: layoutWidth,
+              height: '100%',
             },
             styles.backgroundVideo,
           ]}
