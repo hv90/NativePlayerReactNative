@@ -39,6 +39,8 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_FULLSCREEN = "fullscreen";
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     public static final String PROP_CONTROLS = "controls";
+    public ThemedReactContext mThemedReactContext;
+    public ReactVideoView mVideoView;
 
     @Override
     public String getName() {
@@ -47,13 +49,16 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
 
     @Override
     protected ReactVideoView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactVideoView(themedReactContext);
+        mThemedReactContext = themedReactContext;
+        mVideoView = new ReactVideoView(themedReactContext);
+        ReactVideoViewModule.setVideoView(mVideoView);
+        return mVideoView;
     }
 
     @Override
-    public void onDropViewInstance(ReactVideoView view) {
-        super.onDropViewInstance(view);
-        view.cleanupMediaPlayerResources();
+    public void onDropViewInstance(ReactVideoView videoView) {
+        super.onDropViewInstance(videoView);
+        videoView.cleanupMediaPlayerResources();
     }
 
     @Override
@@ -117,12 +122,24 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
 
     @ReactProp(name = "shouldResume")
     public void resume(final ReactVideoView videoView, final boolean shouldResume) {
-        if(shouldResume) videoView.resume();
+        if(shouldResume) videoView.play();
     }
 
     @ReactProp(name = "shouldPause")
     public void pause(final ReactVideoView videoView, final boolean shouldPause) {
         if(shouldPause) videoView.pause();
+    }
+
+    @ReactProp(name = "shouldPiP")
+    public void PiP(final ReactVideoView videoView, final boolean shouldPiP) {
+        if(shouldPiP){ 
+            mThemedReactContext.getCurrentActivity().enterPictureInPictureMode();
+            videoView.setInPiP();
+        }
+    }
+
+    public ReactVideoView getVideoView() {
+        return mVideoView;
     }
 
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
@@ -175,7 +192,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         videoView.setPlayInBackground(playInBackground);
     }
 
-    @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
+    @ReactProp(name = PROP_CONTROLS, defaultBoolean = true)
     public void setControls(final ReactVideoView videoView, final boolean controls) {
         videoView.setControls(controls);
     }

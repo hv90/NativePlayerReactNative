@@ -133,6 +133,7 @@ public class ReactVideoView extends ScalableVideoView implements
     private boolean mPlayInBackground = false;
     private boolean mBackgroundPaused = false;
     private boolean mIsFullscreen = false;
+    private boolean mIsInPiP = false;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -729,7 +730,7 @@ public class ReactVideoView extends ScalableVideoView implements
 
     @Override
     public void onHostPause() {
-        if (mMediaPlayerValid && !mPaused && !mPlayInBackground) {
+        if (mMediaPlayerValid && !mPaused && !mPlayInBackground && !mIsInPiP) {
             /* Pause the video in background
              * Don't update the paused prop, developers should be able to update it on background
              *  so that when you return to the app the video is paused
@@ -739,12 +740,29 @@ public class ReactVideoView extends ScalableVideoView implements
         }
     }
 
-    public void resume(){
+    public void play(){
         mMediaPlayer.start();
+    }
+
+
+    public void setInPiP(){
+        mIsInPiP = true; 
+    }
+
+    public boolean getInPiP(){
+        return mIsInPiP; 
     }
 
     public void pause(){
         mMediaPlayer.pause();
+    }
+
+    public void restart(){
+        mMediaPlayer.reset();
+    }
+
+    public void stop(){
+        mMediaPlayer.stop();
     }
 
     @Override
